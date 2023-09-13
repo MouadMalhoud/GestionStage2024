@@ -18,7 +18,7 @@ class _LoginState extends State<Login> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Login'),
+        title: const Text('Se connecter'),
       ),
       body: Center(
         child: Column(
@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
               child: TextField(
                 controller: passwordController,
                 decoration: const InputDecoration(
-                  labelText: 'Password',
+                  labelText: 'Mot de passe',
                 ),
                 obscureText: true,
               ),
@@ -70,7 +70,7 @@ class _LoginState extends State<Login> {
                   });
                 }
               },
-              child: const Text('Log In'),
+              child: const Text('Se connecter'),
             ),
             if (errorText != null)
               Text(
@@ -87,7 +87,7 @@ class _LoginState extends State<Login> {
                   ),
                 );
               },
-              child: const Text('Sign Up'),
+              child: const Text("S'inscrire"),
             ),
           ],
         ),
