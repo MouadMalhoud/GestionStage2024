@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart'; // Import your login screen
 import 'home.dart'; // Import Firebase Authentication
-import '../authentication.dart';
+import '/authentication.dart';
 
 class Signup extends StatefulWidget {
   Signup({Key? key}) : super(key: key);
@@ -29,27 +29,6 @@ class _SignupState extends State<Signup> {
 
   final List<String> userTypes = ['Étudiant', 'Employeur']; // Dropdown options
 
-  Future<void> _signUp(BuildContext context) async {
-    try {
-      nom: nomController.text;
-      prenom: prenomController.text;
-      adresse: adresseController.text;
-      telephone: telephoneController.text;
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      // Navigate to the home screen after successful signup
-      if (context.mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const Home(),
-        ));
-      }
-    } catch (e) {
-      // Handle signup errors here
-      print('Signup error: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +168,31 @@ class _SignupState extends State<Signup> {
             
             const SizedBox(height: 25),
             ElevatedButton(
-              onPressed: () => _signUp(context),
+              onPressed: () {
+                if (selectedUserType == "Étudiant") {
+                  signUpWithEmailAndPasswordEtudiant(
+                  context,
+                  emailController.text,
+                  passwordController.text,
+                  nomController.text,
+                  prenomController.text,
+                  telephoneController.text,
+                  adresseController.text
+                  );
+                } else if (selectedUserType == "Employeur") {
+                  signUpWithEmailAndPasswordEmployeur(
+                    context,
+                    emailController.text,
+                    passwordController.text,
+                    nomEntrepriseController.text,
+                    nomPersonneContactController.text,
+                    prenomPersonneContactController.text,
+                    adresseController.text,
+                    telephoneController.text,
+                    posteTelephoniqueController.text
+                  );
+                }
+                },
               child: const Text("S'inscrire"),
             ),
             const SizedBox(height: 12),
