@@ -29,6 +29,27 @@ class _SignupState extends State<Signup> {
 
   final List<String> userTypes = ['Étudiant', 'Employeur']; // Dropdown options
 
+  Future<void> _signUp(BuildContext context) async {
+    try {
+      nom: nomController.text;
+      prenom: prenomController.text;
+      adresse: adresseController.text;
+      telephone: telephoneController.text;
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      // Navigate to the home screen after successful signup
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const Home(),
+        ));
+      }
+    } catch (e) {
+      // Handle signup errors here
+      print('Signup error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
