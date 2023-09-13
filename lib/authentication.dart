@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Sign up a new user
+Future<void> signUpWithEmailAndPassword(String email, String password, String firstName, String lastName) async {
 Future<void> signUpWithEmailAndPassword(String nom, String prenom, String adresse, String telephone, String email, String password) async {
   try {
       nom: nom;
@@ -38,4 +39,5 @@ Future<void> signOut() async {
 // Check if a user is authenticated
 User? getCurrentUser() {
   return FirebaseAuth.instance.currentUser;
+}
 }
