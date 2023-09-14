@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:projetdev/firebase_options.dart';
-import './pages/login.dart'; // Import your login screen
+import './pages/login.dart'; 
+import './pages/internshipCreation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,7 +10,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(InternshipCreation());
+  //runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
