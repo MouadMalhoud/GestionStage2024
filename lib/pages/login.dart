@@ -18,7 +18,7 @@ class _LoginState extends State<Login> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Se connecter'),
+        title: const Text('Se connecter')
       ),
       body: Center(
         child: Column(

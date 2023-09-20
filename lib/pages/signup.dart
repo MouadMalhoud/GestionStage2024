@@ -18,52 +18,54 @@ class _SignupState extends State<Signup> {
   final TextEditingController telephoneController = TextEditingController();
 
   final TextEditingController nomEntrepriseController = TextEditingController();
-  final TextEditingController prenomPersonneContactController = TextEditingController();
-  final TextEditingController nomPersonneContactController = TextEditingController();
-  final TextEditingController posteTelephoniqueController = TextEditingController();
+  final TextEditingController prenomPersonneContactController =
+      TextEditingController();
+  final TextEditingController nomPersonneContactController =
+      TextEditingController();
+  final TextEditingController posteTelephoniqueController =
+      TextEditingController();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   String selectedUserType = 'Étudiant'; // Default selected user type
-
+  String? errorText;
   final List<String> userTypes = ['Étudiant', 'Employeur']; // Dropdown options
 
-  Future<void> _signUp(BuildContext context) async {
-    try {
-      nom: nomController.text;
-      prenom: prenomController.text;
-      adresse: adresseController.text;
-      telephone: telephoneController.text;
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      // Navigate to the home screen after successful signup
-      if (context.mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const Home(),
-        ));
-      }
-    } catch (e) {
-      // Handle signup errors here
-      print('Signup error: $e');
-    }
+  bool isEmailValid(String email) {
+    // Change this regular expression as needed for your specific validation
+    final emailRegex = RegExp(r'^\d{7}@cmontmorency\.qc\.ca$');
+    return emailRegex.hasMatch(email);
+  }
+
+  bool isEmailEmployeurValid(String email) {
+    final emailEmployeurRegEx = RegExp(r'^.*@.*\..*$');
+    return emailEmployeurRegEx.hasMatch(email);
+  }
+
+  bool isPhoneValid(String phoneNumber) {
+    final phoneRegex = RegExp(r'^\d{3}-\d{3}-\d{4}$');
+    return phoneRegex.hasMatch(phoneNumber);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Create a FocusNode for the email field
+    final emailFocusNode = FocusNode();
+
+    // Define a GlobalKey for the form to reset it later
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text("S'inscrire", style: TextStyle(color: Colors.white)),
-        
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-             Container(
+            Container(
               width: 400, // Set the desired width
               child: DropdownButtonFormField<String>(
                 value: selectedUserType,
@@ -90,40 +92,38 @@ class _SignupState extends State<Signup> {
                 child: TextField(
                   controller: nomEntrepriseController,
                   decoration: InputDecoration(labelText: "Nom de l'entreprise"),
-                  obscureText: true,
                 ),
               ),
             ),
-             Visibility(
+            Visibility(
               visible: selectedUserType == 'Employeur',
               child: Container(
                 width: 400,
                 child: TextField(
                   controller: prenomPersonneContactController,
-                  decoration: InputDecoration(labelText: "Prénom de la personne responsable"),
-                  obscureText: true,
+                  decoration: InputDecoration(
+                      labelText: "Prénom de la personne responsable"),
                 ),
               ),
             ),
-             Visibility(
+            Visibility(
               visible: selectedUserType == 'Employeur',
               child: Container(
                 width: 400,
                 child: TextField(
                   controller: nomPersonneContactController,
-                  decoration: InputDecoration(labelText: "Nom de la personne responsable"),
-                  obscureText: true,
+                  decoration: InputDecoration(
+                      labelText: "Nom de la personne responsable"),
                 ),
               ),
             ),
-             Visibility(
+            Visibility(
               visible: selectedUserType == 'Étudiant',
               child: Container(
                 width: 400,
                 child: TextField(
                   controller: prenomController,
                   decoration: InputDecoration(labelText: 'Prénom'),
-                  obscureText: true,
                 ),
               ),
             ),
@@ -134,7 +134,6 @@ class _SignupState extends State<Signup> {
                 child: TextField(
                   controller: nomController,
                   decoration: InputDecoration(labelText: 'Nom'),
-                  obscureText: true,
                 ),
               ),
             ),
@@ -142,36 +141,37 @@ class _SignupState extends State<Signup> {
               width: 400, // Set the desired width
               child: TextField(
                 controller: adresseController,
-                decoration: const InputDecoration(labelText: 'Adresse complète'),
+                decoration:
+                    const InputDecoration(labelText: 'Adresse complète'),
               ),
             ),
-             Container(
+            Container(
               width: 400, // Set the desired width
               child: TextField(
                 controller: telephoneController,
-                decoration: const InputDecoration(labelText: 'Numéro de téléphone'),
+                decoration:
+                    const InputDecoration(labelText: 'Numéro de téléphone'),
               ),
             ),
-          Visibility(
+            Visibility(
               visible: selectedUserType == 'Employeur',
               child: Container(
                 width: 400,
                 child: TextField(
                   controller: posteTelephoniqueController,
                   decoration: InputDecoration(labelText: "Poste téléphonique"),
-                  obscureText: true,
                 ),
               ),
             ),
-
-              Container(
+            Container(
               width: 400,
               height: 150,
-              margin: EdgeInsets.only(top: 20.0),
+              margin: EdgeInsets.only(top: 1.0),
               child: Column(
-                children: [                  
-                  TextField(
+                children: [
+                  TextFormField(
                     controller: emailController,
+                    focusNode: emailFocusNode,
                     decoration: InputDecoration(
                       labelText: 'Email',
                     ),
@@ -186,36 +186,109 @@ class _SignupState extends State<Signup> {
                 ],
               ),
             ),
-            
-            const SizedBox(height: 25),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedUserType == "Étudiant") {
-                  signUpWithEmailAndPasswordEtudiant(
-                  context,
-                  emailController.text,
-                  passwordController.text,
-                  nomController.text,
-                  prenomController.text,
-                  telephoneController.text,
-                  adresseController.text
-                  );
-                } else if (selectedUserType == "Employeur") {
-                  signUpWithEmailAndPasswordEmployeur(
-                    context,
-                    emailController.text,
-                    passwordController.text,
-                    nomEntrepriseController.text,
-                    nomPersonneContactController.text,
-                    prenomPersonneContactController.text,
-                    adresseController.text,
-                    telephoneController.text,
-                    posteTelephoniqueController.text
-                  );
+            //const SizedBox(height: 25),
+            if (errorText != null)
+              Container(
+                margin:
+                    const EdgeInsets.only(top: 2.0), // Add margin to the top
+                child: Text(
+                  errorText!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+           ElevatedButton(
+  onPressed: () {
+    final String email = emailController.text;
+    final String phoneNumber = telephoneController.text;
+
+    if (selectedUserType == 'Employeur' &&
+        nomEntrepriseController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Nom de l'entreprise' est requis.";
+      });
+    } else if (selectedUserType == 'Employeur' &&
+        prenomPersonneContactController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Prénom de la personne responsable' est requis.";
+      });
+    } else if (selectedUserType == 'Employeur' &&
+        nomPersonneContactController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Nom de la personne responsable' est requis.";
+      });
+    } else if (selectedUserType == 'Étudiant' &&
+        prenomController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Prénom' est requis.";
+      });
+    } else if (selectedUserType == 'Étudiant' &&
+        nomController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Nom' est requis.";
+      });
+    } else if (adresseController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Adresse complète' est requis.";
+      });
+    } else if (!isPhoneValid(phoneNumber)) {
+      setState(() {
+        errorText =
+            "Numéro de téléphone non valide. Doit avoir la syntaxe suivante : 123-456-7890";
+      });
+      } else if (selectedUserType == "Employeur" && posteTelephoniqueController.text.isEmpty) {
+      setState(() {
+        errorText =
+            "Le champ 'Poste téléphonique' est requis.";
+      });
+    } else if (passwordController.text.isEmpty) {
+      setState(() {
+        errorText = "Le champ 'Mot de passe' est requis.";
+      });
+    } else if (selectedUserType == 'Étudiant' && !isEmailValid(email)) {
+      setState(() {
+        errorText =
+            "Email non valide. L'email doit avoir la syntaxe suivante : 1234567@cmontmorency.qc.ca.";
+      });
+    } else if (selectedUserType == "Employeur" && !isEmailEmployeurValid(email)) {
+       setState(() {
+        errorText =
+            "Email non valide. L'email doit contenir un @ et un .";
+      });
+    } else {
+      setState(() {
+        errorText = null; // Reset errorText when all conditions are met
+      });
+      // Perform sign-up here
+      if (selectedUserType == "Étudiant" &&
+                      isEmailValid(email) &&
+                      isPhoneValid(phoneNumber)) {
+                    signUpWithEmailAndPasswordEtudiant(
+                        context,
+                        emailController.text,
+                        passwordController.text,
+                        nomController.text,
+                        prenomController.text,
+                        telephoneController.text,
+                        adresseController.text);
+                  } else if (selectedUserType == "Employeur" &&
+                      isPhoneValid(phoneNumber) &&
+                      isEmailEmployeurValid(email)) {
+                    signUpWithEmailAndPasswordEmployeur(
+                        context,
+                        emailController.text,
+                        passwordController.text,
+                        nomEntrepriseController.text,
+                        nomPersonneContactController.text,
+                        prenomPersonneContactController.text,
+                        adresseController.text,
+                        telephoneController.text,
+                        posteTelephoniqueController.text);
+                  }
                 }
-                },
-              child: const Text("S'inscrire"),
-            ),
+              },
+  child: const Text("S'inscrire"),
+),
+
             const SizedBox(height: 12),
             TextButton(
               onPressed: () {
