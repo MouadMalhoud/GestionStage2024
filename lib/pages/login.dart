@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'home.dart'; // Import your home screen
 import 'signup.dart';
+import '/authentication.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -18,13 +19,13 @@ class _LoginState extends State<Login> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Se connecter')
+        title: const Text('Login'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: 250,
               child: TextField(
                 controller: emailController,
@@ -34,60 +35,37 @@ class _LoginState extends State<Login> {
               ),
             ),
             const SizedBox(height: 12),
-            Container(
+            SizedBox(
               width: 250,
               child: TextField(
                 controller: passwordController,
                 decoration: const InputDecoration(
-                  labelText: 'Mot de passe',
+                  labelText: 'Password',
                 ),
                 obscureText: true,
               ),
             ),
             const SizedBox(height: 25),
             ElevatedButton(
-              onPressed: () async {
-                try {
-                  final UserCredential userCredential =
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                  final User? user = userCredential.user;
-
-                  if (user != null) {
-                    // Valid credentials, navigate to the home screen
-                    if (context.mounted) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => const Home(),
-                      ));
-                    }
-                  }
-                } on FirebaseAuthException catch (e) {
-                  // Handle authentication errors here
-                  setState(() {
-                    errorText = e.message;
-                  });
-                }
-              },
-              child: const Text('Se connecter'),
+              onPressed: () => signInWithEmailAndPassword(
+                  context, emailController.text, passwordController.text),
+              child: const Text('Log In'),
             ),
             if (errorText != null)
               Text(
                 errorText!,
                 style: const TextStyle(color: Colors.red),
               ),
-            const SizedBox(height: 16), // Add some spacing
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () {
-                // Navigate to the SignupScreen when the button is pressed
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => Signup(),
+                    builder: (context) => const Signup(),
                   ),
                 );
               },
-              child: const Text("S'inscrire"),
+              child: const Text('Sign Up'),
             ),
           ],
         ),
